@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.been.beenbackend.Mapper.UserMapper">
+	<select id="list" resultType="user">
+		select *
+		from user
+	</select>
+	
+	<select id="listOneById" parameterType="int" resultType="user">
+		select *
+		from user
+		where id = #{id}
+	</select>
+
+	<select id="listOneByEmail" parameterType="String" resultType="user">
+		select *
+		from user
+		where email = #{email}
+	</select>
+
+	<select id="signIn" parameterType="String" resultType="user">
+		select *
+		from user
+		where email = #{email} and emailConfirmation = 1;
+	</select>
+	
+	<insert id="register" parameterType="user">
+		insert into user (email, password, intro, nickname, name)
+		values (#{email}, #{password}, #{intro}, #{nickname}, #{name})
+		<selectKey resultType="int" keyProperty="id" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		;
+	</insert>
+	
+	<update id="modify" parameterType="user">
+		update user
+		set intro = #{intro}, nickname = #{nickname}, tier = #{tier},
+		emailConfirmation = #{emailConfirmation}, status = #{status}
+		where id = #{id};
+	</update>
+
+	<update id="modifyPassword" parameterType="user">
+		update user
+		set password = #{password}
+		where id = #{id};
+	</update>
+
+	<delete id="delete" parameterType="int">
+		delete from user
+		where id = #{id};
+	</delete>
+
+	<!--팔로우 신청-->
+	<insert id="makeFollow" parameterType="int">
+		insert into follow (followerId, followedId)
+		values (#{followerId}, #{followedId});
+	</insert>
+
+	<!--팔로우 삭제-->
+	<delete id="removeFollow" parameterType="int">
+		delete from follow
+		where followerId = #{followerId} and followedId = #{followedId};
+	</delete>
+
+	<!--팔로우 수락-->
+	<update id="acceptFollow" parameterType="int">
+		update follow
+		set accepted = 1
+		where followerId = #{followerId} and followedId = #{followedId};
+	</update>
+
+	<!-- 나를 팔로우한 사람들 보기-->
+	<select id="showFollower" parameterType="Integer" resultType="user">
+		SELECT user.*
+		FROM user INNER JOIN follow ON follow.followerId=user.id
+		WHERE follow.followedId = #{id} AND follow.accepted=1
+		ORDER BY user.createdAt DESC
+		limit 20
+		offset #{start}
+	</select>
+
+	<!-- 내가 팔로우중인 사람들 보기-->
+	<select id="showFollowing" parameterType="Integer" resultType="user">
+		select user.*
+		from user inner join follow on follow.followedId = user.id
+		where follow.followerId = #{id} and follow.accepted=1
+		ORDER BY user.createdAt DESC
+		limit 20
+		offset #{start}
+	</select>
+
+	<!--이메일로 검색-->
+	<select id="findUserByEmail" parameterType="Map" resultType="user">
+		select * from user
+		where email like #{email}
+		ORDER BY createdAt DESC
+		limit 20
+		offset #{start};
+	</select>
+
+	<!--닉네임으로 검색-->
+	<select id="findUserByNickname" parameterType="Map" resultType="user">
+		select * from user
+		where nickname like #{nickname}
+		ORDER BY createdAt DESC
+		limit 20
+		offset #{start};
+	</select>
+
+	<update id="updatePic" parameterType="user">
+		update user
+		set profilePicSrc = #{profilePicSrc}, profilePicName = #{profilePicName}
+		where email = #{email};
+	</update>
+
+	<select id="beforeFollowList" parameterType="int" resultType="follow">
+		select * from follow
+		where followedId = #{id} and accepted = 0
+		limit 20
+		offset #{start}
+		;
+	</select>
+
+	<select id="showFollowerCnt" parameterType="int" resultType="int">
+		SELECT COUNT(followerId) FROM follow WHERE followedId = #{followedId} AND accepted = 1;
+	</select>
+
+	<select id="showFollowedCnt" parameterType="int" resultType="int">
+		SELECT COUNT(followedId) FROM follow WHERE followerId = #{followerId} AND accepted = 1;
+	</select>
+
+	<select id="getPreferedArea" parameterType="int" resultType="String">
+		select area from preferred_area where userId = #{userId};
+	</select>
+
+	<select id="getPreferedAreaAll" parameterType="int" resultType="PreferredArea">
+		select * from preferred_area where userId = #{userId};
+	</select>
+
+	<select id="getPreferedStyle" parameterType="int" resultType="String">
+		select style from preferred_style where userId = #{userId};
+	</select>
+
+	<insert id="makePreferredArea" parameterType="PreferredArea">
+		insert into preferred_area (userId, area, longitude, latitude)
+		values (#{userId},#{area},#{longitude}, #{latitude});
+	</insert>
+
+	<insert id="makePreferredStyle" parameterType="PreferredStyle">
+		insert into preferred_style (userId, Style)
+		values (#{userId},#{Style});
+	</insert>
+
+	<delete id="deletePreferredArea" parameterType="PreferredArea">
+		delete from preferred_area
+		where userId = #{userId} and area = #{area} and longitude = #{longitude} and latitude = #{latitude};
+	</delete>
+
+	<delete id="deletePreferredStyle" parameterType="PreferredStyle">
+		delete from preferred_style
+		where userId = #{userId} and style = #{style};
+	</delete>
+</mapper>

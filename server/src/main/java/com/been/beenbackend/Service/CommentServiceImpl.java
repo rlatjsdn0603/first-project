@@ -1,0 +1,69 @@
+package com.been.beenbackend.Service;
+
+import com.been.beenbackend.Mapper.CommentMapper;
+import com.been.beenbackend.dto.Comment;
+import com.been.beenbackend.dto.LikeComment;
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CommentServiceImpl implements CommentService{
+
+    @Autowired
+    private SqlSession sqlSession;
+
+    @Override
+    public List<Comment> list() {
+        return sqlSession.getMapper(CommentMapper.class).list();
+    }
+
+    @Override
+    public int register(Comment comment) {
+        return sqlSession.getMapper(CommentMapper.class).register(comment);
+    }
+
+    @Override
+    public void modify(Comment comment) {
+        sqlSession.getMapper(CommentMapper.class).modify(comment);
+    }
+
+    @Override
+    public void delete(int commentId) {
+        sqlSession.getMapper(CommentMapper.class).delete(commentId);
+    }
+
+    @Override
+    public Comment listOne(int commentId) {
+        return sqlSession.getMapper(CommentMapper.class).listOne(commentId);
+    }
+
+    @Override
+    public List<Comment> listByPostId(int postId) {
+        return sqlSession.getMapper(CommentMapper.class).listByPostId(postId);
+    }
+
+    @Override
+    public int showLikeyCnt(int commentId) {
+        return sqlSession.getMapper(CommentMapper.class).showLikeyCnt(commentId);
+    }
+
+    @Override
+    public List<LikeComment> getLike(int postId, int userId) {
+        return sqlSession.getMapper(CommentMapper.class).getLikey(postId, userId);
+    }
+
+    @Override
+    public int makeLike(int commentId, int userId) {
+        return sqlSession.getMapper(CommentMapper.class).makeLike(commentId, userId);
+    }
+
+    @Override
+    public int deleteLike(int commentId, int userId) {
+        return sqlSession.getMapper(CommentMapper.class).deleteLike(commentId, userId);
+    }
+
+}
+
